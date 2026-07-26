@@ -114,8 +114,8 @@
 
 <script>
 (async function() {
-    const DB_URL = "https://pcrurldhpubyznrdackb.supabase.co/rest/v1/tbl_banners?is_active=eq.true&order=sort_order.asc";
-    const API_KEY = "sb_publishable_iM2V0yw1KKfpGVwa7LwDXg_KbL3lGG0";
+    const DB_URL = "https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1/tbl_hero_board";
+    const API_KEY = "sb_publishable_mEO4n-ep4h5aP6FYZKC3yA_7KikwCCa";
     const mount = document.getElementById("banner-mount");
 
     try {

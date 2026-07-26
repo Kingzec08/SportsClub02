@@ -299,13 +299,14 @@
     </div>
 
     <script>
+      // เชื่อมต่อกับ API ตาราง tbl_hero_board ของคุณ
       const DB_URL = "https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1/tbl_hero_board";
       const API_KEY = "sb_publishable_mEO4n-ep4h5aP6FYZKC3yA_7KikwCCa";
 
       let currentBoard = null;
-
-      const getMatchKey = (h, a) => `voted_m_${h.trim()}_vs_${a.trim()}`;
-      const getOuKey = (h, a) => `voted_ou_${h.trim()}_vs_${a.trim()}`;
+      // เพิ่ม ( || "") เพื่อป้องกัน Error กรณีชื่อทีมเป็น null หรือ undefined
+      const getMatchKey = (h, a) => `voted_m_${(h || "home").trim()}_vs_${(a || "away").trim()}`;
+      const getOuKey = (h, a) => `voted_ou_${(h || "home").trim()}_vs_${(a || "away").trim()}`;
 
       async function fetchBoard() {
         const mount = document.getElementById("board-mount");
@@ -314,143 +315,96 @@
             headers: { apikey: API_KEY, Authorization: `Bearer ${API_KEY}` },
           });
           const data = await res.json();
-          if (!data || data.length === 0) return;
+          if (!data || data.length === 0) {
+            mount.innerHTML = `<p style="text-align: center; padding: 40px; color: #aaa; font-size: 0.9rem;">ยังไม่มีข้อมูลการแข่งขันในขณะนี้</p>`;
+            return;
+          }
 
           const d = data[data.length - 1];
           currentBoard = d;
 
-          const matchKey = getMatchKey(d.home_name, d.away_name);
-          const ouKey = getOuKey(d.home_name, d.away_name);
+          // ดึงข้อมูลและกำหนดค่าเริ่มต้นป้องกัน Error (ถ้าไม่มีข้อมูล จะใช้ข้อความสำรองแทน)
+          const homeName = d.home_name || "Home Team";
+          const awayName = d.away_name || "Away Team";
+          const homeColor = d.home_color || "#1a365d";
+          const awayColor = d.away_color || "#7f1d1d";
+          const homeFlag = d.home_flag || "https://via.placeholder.com/75?text=Flag";
+          const awayFlag = d.away_flag || "https://via.placeholder.com/75?text=Flag";
+          const homePlayer = d.home_player || "https://via.placeholder.com/150?text=Player";
+          const awayPlayer = d.away_player || "https://via.placeholder.com/150?text=Player";
+          const leagueLogo = d.league_logo || "https://via.placeholder.com/42?text=Cup";
+          const leagueName = d.league_name || "FOOTBALL LEAGUE";
+          const matchTime = d.match_time || "รอระบุเวลา";
+          const oddsText = d.odds_text || "-";
 
+          const matchKey = getMatchKey(homeName, awayName);
+          const ouKey = getOuKey(homeName, awayName);
           const votedM = localStorage.getItem(matchKey);
           const votedOU = localStorage.getItem(ouKey);
 
-          const totalM = d.vote_home + d.vote_away;
-          const pH =
-            totalM === 0 ? 50 : Math.round((d.vote_home / totalM) * 100);
+          const voteHome = d.vote_home || 0;
+          const voteAway = d.vote_away || 0;
+          const voteOver = d.vote_over || 0;
+          const voteUnder = d.vote_under || 0;
+
+          const totalM = voteHome + voteAway;
+          const pH = totalM === 0 ? 50 : Math.round((voteHome / totalM) * 100);
           const pA = totalM === 0 ? 50 : 100 - pH;
 
-          const totalOU = d.vote_under + d.vote_over;
-          const pU =
-            totalOU === 0 ? 50 : Math.round((d.vote_under / totalOU) * 100);
+          const totalOU = voteUnder + voteOver;
+          const pU = totalOU === 0 ? 50 : Math.round((voteUnder / totalOU) * 100);
           const pO = totalOU === 0 ? 50 : 100 - pU;
 
-          const votedTeamName =
-            votedM === "h" ? d.home_name : votedM === "a" ? d.away_name : "";
-          const votedOUText =
-            votedOU === "u" ? "ต่ำ" : votedOU === "o" ? "สูง" : "";
+          const votedTeamName = votedM === "h" ? homeName : votedM === "a" ? awayName : "";
+          const votedOUText = votedOU === "u" ? "ต่ำ" : votedOU === "o" ? "สูง" : "";
 
           mount.innerHTML = `
-                    <div class="board-top">
-                        <div class="team-box">
-                            <img src="${d.home_flag}" class="flag">
-                            <div class="ribbon left" style="background:${
-                              d.home_color
-                            };">${d.home_name}</div>
-                            <img src="${d.home_player}" class="player left">
-                        </div>
-                        <div class="center-meta">
-                            <img src="${d.league_logo}" class="cup">
-                            <div class="m-title">${d.league_name}<br><span>${
-            d.match_time
-          }</span></div>
-                            <div class="vs-badge">VS</div>
-                        </div>
-                        <div class="team-box right">
-                            <img src="${d.away_flag}" class="flag">
-                            <div class="ribbon right" style="background:${
-                              d.away_color
-                            };">${d.away_name}</div>
-                            <img src="${d.away_player}" class="player right">
-                        </div>
-                    </div>
+            <div class="board-top">
+                <div class="team-box">
+                    <img src="${homeFlag}" class="flag" onerror="this.style.display='none'">
+                    <div class="ribbon left" style="background:${homeColor};">${homeName}</div>
+                    <img src="${homePlayer}" class="player left" onerror="this.style.display='none'">
+                </div>
+                <div class="center-meta">
+                    <img src="${leagueLogo}" class="cup" onerror="this.style.display='none'">
+                    <div class="m-title">${leagueName}<br><span>${matchTime}</span></div>
+                    <div class="vs-badge">VS</div>
+                </div>
+                <div class="team-box right">
+                    <img src="${awayFlag}" class="flag" onerror="this.style.display='none'">
+                    <div class="ribbon right" style="background:${awayColor};">${awayName}</div>
+                    <img src="${awayPlayer}" class="player right" onerror="this.style.display='none'">
+                </div>
+            </div>
 
-                    <div class="stat-head">
-                        <span style="color:${d.home_color};">${
-            d.vote_home
-          } โหวต (${pH}%)</span>
-                        <span style="color:#111;">${d.odds_text}</span>
-                        <span style="color:${d.away_color};">${
-            d.vote_away
-          } โหวต (${pA}%)</span>
-                    </div>
-                    <div class="track"><div class="fill" style="background:${
-                      d.home_color
-                    }; width:${pH}%;"></div><div class="fill" style="background:${
-            d.away_color
-          }; width:${pA}%;"></div></div>
-                    
-                    <div class="vote-actions">
-                        <label><input type="radio" name="vm" value="h" ${
-                          votedM ? "disabled" : ""
-                        } ${votedM === "h" || !votedM ? "checked" : ""}> ${
-            d.home_name
-          }</label>
-                        <label><input type="radio" name="vm" value="a" ${
-                          votedM ? "disabled" : ""
-                        } ${votedM === "a" ? "checked" : ""}> ${
-            d.away_name
-          }</label>
-                        <button class="btn-vote" id="btn-m" onclick="castVote('match')" ${
-                          votedM ? "disabled" : ""
-                        }>
-                            ${
-                              votedM
-                                ? '<i class="fas fa-check"></i> บันทึกแล้ว'
-                                : "โหวตเชียร์"
-                            }
-                        </button>
-                    </div>
-                    <div class="sub-hint" style="${
-                      votedM ? "color:#A81B30; font-weight:700;" : ""
-                    }">
-                        ${
-                          votedM
-                            ? 'คุณโหวตให้ "' + votedTeamName + '" แล้ว'
-                            : "โอกาสชนะวิเคราะห์จากมหาชน"
-                        }
-                    </div>
+            <div class="stat-head">
+                <span style="color:${homeColor};">${voteHome} โหวต (${pH}%)</span>
+                <span style="color:#111;">${oddsText}</span>
+                <span style="color:${awayColor};">${voteAway} โหวต (${pA}%)</span>
+            </div>
+            <div class="track"><div class="fill" style="background:${homeColor}; width:${pH}%;"></div><div class="fill" style="background:${awayColor}; width:${pA}%;"></div></div>
+            
+            <div class="vote-actions">
+                <label><input type="radio" name="vm" value="h" ${votedM ? "disabled" : ""} ${votedM === "h" || !votedM ? "checked" : ""}> ${homeName}</label>
+                <label><input type="radio" name="vm" value="a" ${votedM ? "disabled" : ""} ${votedM === "a" ? "checked" : ""}> ${awayName}</label>
+                <button class="btn-vote" id="btn-m" onclick="castVote('match')" ${votedM ? "disabled" : ""}>${votedM ? '<i class="fas fa-check"></i> บันทึกแล้ว' : "โหวตเชียร์"}</button>
+            </div>
+            <div class="sub-hint" style="${votedM ? "color:#A81B30; font-weight:700;" : ""}">${votedM ? 'คุณโหวตให้ "' + votedTeamName + '" แล้ว' : "โอกาสชนะวิเคราะห์จากมหาชน"}</div>
 
-                    <div class="stat-head">
-                        <span style="color:#A81B30;">${
-                          d.vote_under
-                        } โหวต (${pU}%)</span>
-                        <span style="color:#111;">สกอร์ สูง / ต่ำ</span>
-                        <span style="color:#1D3557;">${
-                          d.vote_over
-                        } โหวต (${pO}%)</span>
-                    </div>
-                    <div class="track"><div class="fill" style="background:#A81B30; width:${pU}%;"></div><div class="fill" style="background:#1D3557; width:${pO}%;"></div></div>
-                    
-                    <div class="vote-actions">
-                        <label><input type="radio" name="vou" value="u" ${
-                          votedOU ? "disabled" : ""
-                        } ${
-            votedOU === "u" || !votedOU ? "checked" : ""
-          }> ต่ำ</label>
-                        <label><input type="radio" name="vou" value="o" ${
-                          votedOU ? "disabled" : ""
-                        } ${votedOU === "o" ? "checked" : ""}> สูง</label>
-                        <button class="btn-vote" id="btn-ou" onclick="castVote('ou')" ${
-                          votedOU ? "disabled" : ""
-                        }>
-                            ${
-                              votedOU
-                                ? '<i class="fas fa-check"></i> บันทึกแล้ว'
-                                : "โหวตสกอร์"
-                            }
-                        </button>
-                    </div>
-                    <div class="sub-hint" style="margin-bottom:0; ${
-                      votedOU ? "color:#1D3557; font-weight:700;" : ""
-                    }">
-                        ${
-                          votedOU
-                            ? 'คุณเลือกสกอร์ "' + votedOUText + '" แล้ว'
-                            : "เลือกทรรศนะสกอร์รวมตลอดเกม"
-                        }
-                    </div>
-                `;
+            <div class="stat-head">
+                <span style="color:#A81B30;">${voteUnder} โหวต (${pU}%)</span>
+                <span style="color:#111;">สกอร์ สูง / ต่ำ</span>
+                <span style="color:#1D3557;">${voteOver} โหวต (${pO}%)</span>
+            </div>
+            <div class="track"><div class="fill" style="background:#A81B30; width:${pU}%;"></div><div class="fill" style="background:#1D3557; width:${pO}%;"></div></div>
+            
+            <div class="vote-actions">
+                <label><input type="radio" name="vou" value="u" ${votedOU ? "disabled" : ""} ${votedOU === "u" || !votedOU ? "checked" : ""}> ต่ำ</label>
+                <label><input type="radio" name="vou" value="o" ${votedOU ? "disabled" : ""} ${votedOU === "o" ? "checked" : ""}> สูง</label>
+                <button class="btn-vote" id="btn-ou" onclick="castVote('ou')" ${votedOU ? "disabled" : ""}>${votedOU ? '<i class="fas fa-check"></i> บันทึกแล้ว' : "โหวตสกอร์"}</button>
+            </div>
+            <div class="sub-hint" style="margin-bottom:0; ${votedOU ? "color:#1D3557; font-weight:700;" : ""}">${votedOU ? 'คุณเลือกสกอร์ "' + votedOUText + '" แล้ว' : "เลือกทรรศนะสกอร์รวมตลอดเกม"}</div>
+          `;
         } catch (e) {
           mount.innerHTML = `<p style="color:red; text-align:center;">ซิงค์ล้มเหลว: ${e.message}</p>`;
         }
@@ -460,15 +414,13 @@
         if (!currentBoard) return;
         const d = currentBoard;
         const id = d.id;
-        const matchKey = getMatchKey(d.home_name, d.away_name);
-        const ouKey = getOuKey(d.home_name, d.away_name);
+        const homeName = d.home_name || "Home Team";
+        const awayName = d.away_name || "Away Team";
+        const matchKey = getMatchKey(homeName, awayName);
+        const ouKey = getOuKey(homeName, awayName);
 
-        const url = `https://pcrurldhpubyznrdackb.supabase.co/rest/v1/tbl_hero_board?id=eq.${id}`;
-        const headers = {
-          apikey: API_KEY,
-          Authorization: `Bearer ${API_KEY}`,
-          "Content-Type": "application/json",
-        };
+        const url = `https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1/tbl_hero_board?id=eq.${id}`;
+        const headers = { apikey: API_KEY, Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" };
 
         const r = await fetch(url, { headers });
         const cur = (await r.json())[0];
@@ -476,25 +428,15 @@
 
         if (type === "match") {
           const sel = document.querySelector('input[name="vm"]:checked').value;
-          payload =
-            sel === "h"
-              ? { vote_home: cur.vote_home + 1 }
-              : { vote_away: cur.vote_away + 1 };
+          payload = sel === "h" ? { vote_home: (cur.vote_home || 0) + 1 } : { vote_away: (cur.vote_away || 0) + 1 };
           localStorage.setItem(matchKey, sel);
         } else {
           const v = document.querySelector('input[name="vou"]:checked').value;
-          payload =
-            v === "u"
-              ? { vote_under: cur.vote_under + 1 }
-              : { vote_over: cur.vote_over + 1 };
+          payload = v === "u" ? { vote_under: (cur.vote_under || 0) + 1 } : { vote_over: (cur.vote_over || 0) + 1 };
           localStorage.setItem(ouKey, v);
         }
 
-        await fetch(url, {
-          method: "PATCH",
-          headers,
-          body: JSON.stringify(payload),
-        });
+        await fetch(url, { method: "PATCH", headers, body: JSON.stringify(payload) });
         fetchBoard();
       }
 

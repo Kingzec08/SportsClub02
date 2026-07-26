@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบหลังบ้าน - จัดการ Hero Board Widget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Prompt', sans-serif; }
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border-radius: 0.5rem; border: 1px solid #3f3f46; }
+    </style>
+</head>
+<body class="bg-[#09090b] text-zinc-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <!-- ส่วนหัวเว็บ -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800 pb-5 mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-[#D4AF37] flex items-center gap-2">
+                    <i class="fas fa-trophy"></i> ระบบจัดการบอร์ดโหวต (Hero Board Admin)
+                </h1>
+                <p class="text-xs text-zinc-400 mt-1">จัดการข้อมูลการแข่งขัน ราคาต่อรอง และควบคุมคะแนนโหวตแบบ Real-time</p>
+            </div>
+            <button onclick="loadCurrentMatch()" class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 border border-zinc-700 transition">
+                <i class="fas fa-sync-alt"></i> ดึงข้อมูลล่าสุด
+            </button>
+        </div>
+
+        <!-- ฟอร์มจัดการข้อมูล -->
+        <div class="bg-[#121215] p-6 md:p-8 rounded-2xl border border-zinc-800 shadow-xl mb-8">
+            <form id="heroForm" onsubmit="return false;" class="space-y-6">
+                <input type="hidden" id="match_id">
+
+                <!-- ข้อมูลทัวร์นาเมนต์ -->
+                <div>
+                    <h2 class="text-base font-bold text-blue-400 border-l-4 border-blue-500 pl-3 mb-4 flex items-center gap-2">
+                        <i class="fas fa-flag-checkered"></i> ข้อมูลทัวร์นาเมนต์ & ราคาต่อรอง
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">ชื่อลีก / ทัวร์นาเมนต์</label>
+                            <input type="text" id="league_name" required placeholder="เช่น PREMIER LEAGUE" class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">เวลาแข่งขัน</label>
+                            <input type="text" id="match_time" required placeholder="เช่น 23:30 น." class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">ราคาต่อรอง / ทรรศนะ</label>
+                            <input type="text" id="odds_text" required placeholder="เช่น เสมอ / 2.5" class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">URL โลโก้ถ้วยรางวัล / ลีก</label>
+                            <input type="url" id="league_logo" required placeholder="https://..." class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ทีมเจ้าบ้าน -->
+                <div>
+                    <h2 class="text-base font-bold text-red-400 border-l-4 border-red-500 pl-3 mb-4 flex items-center gap-2">
+                        <i class="fas fa-home"></i> ทีมเจ้าบ้าน (Home Team)
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">ชื่อทีมเจ้าบ้าน</label>
+                            <input type="text" id="home_name" required placeholder="เช่น ARSENAL" class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">สีประจำทีม</label>
+                            <input type="color" id="home_color" value="#EF0107" class="w-full h-[42px] bg-[#1a1a1e] border border-zinc-700 rounded-lg p-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">URL โลโก้ / ธงทีม</label>
+                            <input type="url" id="home_flag" required placeholder="https://..." class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">URL รูปนักเตะ (PNG พื้นหลังใส)</label>
+                            <input type="url" id="home_player" required placeholder="https://..." class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ทีมเยือน -->
+                <div>
+                    <h2 class="text-base font-bold text-cyan-400 border-l-4 border-cyan-500 pl-3 mb-4 flex items-center gap-2">
+                        <i class="fas fa-plane"></i> ทีมเยือน (Away Team)
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">ชื่อทีมเยือน</label>
+                            <input type="text" id="away_name" required placeholder="เช่น CHELSEA" class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">สีประจำทีม</label>
+                            <input type="color" id="away_color" value="#034694" class="w-full h-[42px] bg-[#1a1a1e] border border-zinc-700 rounded-lg p-1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">URL โลโก้ / ธงทีม</label>
+                            <input type="url" id="away_flag" required placeholder="https://..." class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-zinc-400 block mb-1 font-semibold">URL รูปนักเตะ (PNG พื้นหลังใส)</label>
+                            <input type="url" id="away_player" required placeholder="https://..." class="w-full bg-[#1a1a1e] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- จัดการคะแนนโหวต -->
+                <div>
+                    <h2 class="text-base font-bold text-amber-400 border-l-4 border-amber-500 pl-3 mb-4 flex items-center justify-between">
+                        <span class="flex items-center gap-2"><i class="fas fa-chart-bar"></i> ปรับแต่งคะแนนโหวต</span>
+                        <button type="button" onclick="resetVotes()" class="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded transition">
+                            <i class="fas fa-rotate-left mr-1"></i> รีเซ็ตโหวตเป็น 0
+                        </button>
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#1a1a1e] p-4 rounded-xl border border-zinc-800">
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1">โหวตเจ้าบ้าน</label>
+                            <input type="number" id="vote_home" min="0" class="w-full bg-[#121215] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1">โหวตทีมเยือน</label>
+                            <input type="number" id="vote_away" min="0" class="w-full bg-[#121215] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1">โหวตสกอร์สูง</label>
+                            <input type="number" id="vote_over" min="0" class="w-full bg-[#121215] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold">
+                        </div>
+                        <div>
+                            <label class="text-xs text-zinc-400 block mb-1">โหวตสกอร์ต่ำ</label>
+                            <input type="number" id="vote_under" min="0" class="w-full bg-[#121215] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- กล่องแจ้งเตือนสถานะ -->
+                <div id="status-msg" class="hidden p-3 rounded-xl text-center text-sm font-bold"></div>
+
+                <!-- ปุ่มควบคุมหลัก -->
+                <div class="flex flex-col md:flex-row gap-4 pt-4 border-t border-zinc-800">
+                    <button type="button" onclick="createNewMatch()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+                        <i class="fas fa-plus-circle"></i> <span>ขึ้นแมตช์ใหม่ (สร้างรายการใหม่)</span>
+                    </button>
+                    <button type="button" onclick="updateMatch()" class="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] hover:opacity-90 text-black font-extrabold py-3 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+                        <i class="fas fa-save"></i> <span>บันทึกการแก้ไข (อัปเดตแมตช์เดิม)</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const DB_URL = "https://pcrurldhpubyznrdackb.supabase.co/rest/v1/tbl_hero_board";
+        const API_KEY = "sb_publishable_iM2V0yw1KKfpGVwa7LwDXg_KbL3lGG0";
+        
+        const headers = {
+            "apikey": API_KEY,
+            "Authorization": `Bearer ${API_KEY}`,
+            "Content-Type": "application/json"
+        };
+
+        // 1. ดึงข้อมูลแมตช์ล่าสุดมาแสดงบนฟอร์ม
+        async function loadCurrentMatch() {
+            try {
+                const res = await fetch(`${DB_URL}?order=id.desc&limit=1`, { headers });
+                const data = await res.json();
+                
+                if (!data || data.length === 0) {
+                    showStatus("ไม่พบข้อมูลการแข่งขันในระบบ กรุณาสร้างแมตช์ใหม่", false);
+                    return;
+                }
+
+                const d = data[0];
+                document.getElementById("match_id").value = d.id;
+                document.getElementById("league_name").value = d.league_name || "";
+                document.getElementById("match_time").value = d.match_time || "";
+                document.getElementById("odds_text").value = d.odds_text || "";
+                document.getElementById("league_logo").value = d.league_logo || "";
+
+                document.getElementById("home_name").value = d.home_name || "";
+                document.getElementById("home_color").value = d.home_color || "#EF0107";
+                document.getElementById("home_flag").value = d.home_flag || "";
+                document.getElementById("home_player").value = d.home_player || "";
+
+                document.getElementById("away_name").value = d.away_name || "";
+                document.getElementById("away_color").value = d.away_color || "#034694";
+                document.getElementById("away_flag").value = d.away_flag || "";
+                document.getElementById("away_player").value = d.away_player || "";
+
+                document.getElementById("vote_home").value = d.vote_home || 0;
+                document.getElementById("vote_away").value = d.vote_away || 0;
+                document.getElementById("vote_over").value = d.vote_over || 0;
+                document.getElementById("vote_under").value = d.vote_under || 0;
+
+                showStatus("ดึงข้อมูลแมตช์ล่าสุดเรียบร้อยแล้ว", true);
+            } catch (e) {
+                showStatus("เกิดข้อผิดพลาดในการเชื่อมต่อ: " + e.message, false);
+            }
+        }
+
+        // 2. รวบรวมข้อมูลจากฟอร์ม
+        function getFormData() {
+            return {
+                league_name: document.getElementById("league_name").value,
+                match_time: document.getElementById("match_time").value,
+                odds_text: document.getElementById("odds_text").value,
+                league_logo: document.getElementById("league_logo").value,
+                home_name: document.getElementById("home_name").value,
+                home_color: document.getElementById("home_color").value,
+                home_flag: document.getElementById("home_flag").value,
+                home_player: document.getElementById("home_player").value,
+                away_name: document.getElementById("away_name").value,
+                away_color: document.getElementById("away_color").value,
+                away_flag: document.getElementById("away_flag").value,
+                away_player: document.getElementById("away_player").value,
+                vote_home: parseInt(document.getElementById("vote_home").value) || 0,
+                vote_away: parseInt(document.getElementById("vote_away").value) || 0,
+                vote_over: parseInt(document.getElementById("vote_over").value) || 0,
+                vote_under: parseInt(document.getElementById("vote_under").value) || 0,
+            };
+        }
+
+        // 3. อัปเดตข้อมูลแมตช์ปัจจุบัน (PATCH)
+        async function updateMatch() {
+            const id = document.getElementById("match_id").value;
+            if (!id) return alert("ไม่พบ ID แมตช์ กรุณาดึงข้อมูลล่าสุดก่อน");
+
+            try {
+                const res = await fetch(`${DB_URL}?id=eq.${id}`, {
+                    method: "PATCH",
+                    headers: headers,
+                    body: JSON.stringify(getFormData())
+                });
+                if (res.ok) {
+                    showStatus("บันทึกการแก้ไขเรียบร้อยแล้ว! (หน้าเว็บจริงอัปเดตแล้ว)", true);
+                    loadCurrentMatch();
+                } else {
+                    showStatus("บันทึกไม่สำเร็จ กรุณาตรวจสอบสิทธิ์ของ API Key", false);
+                }
+            } catch (e) {
+                showStatus("Error: " + e.message, false);
+            }
+        }
+
+        // 4. สร้างรายการแข่งขันใหม่ (POST) และรีเฟรชโหวตเป็น 0
+        async function createNewMatch() {
+            if (!confirm("ต้องการสร้างรายการแมตช์ใหม่ และรีเซ็ตคะแนนโหวตทั้งหมดเป็น 0 ใช่หรือไม่?")) return;
+
+            const payload = getFormData();
+            payload.vote_home = 0;
+            payload.vote_away = 0;
+            payload.vote_over = 0;
+            payload.vote_under = 0;
+
+            try {
+                const res = await fetch(DB_URL, {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    showStatus("สร้างแมตช์ใหม่สำเร็จแล้ว! ระบบเปลี่ยนไปใช้ข้อมูลชุดใหม่ทันที", true);
+                    loadCurrentMatch();
+                } else {
+                    showStatus("สร้างแมตช์ใหม่ไม่สำเร็จ", false);
+                }
+            } catch (e) {
+                showStatus("Error: " + e.message, false);
+            }
+        }
+
+        // 5. รีเซ็ตเฉพาะคะแนนโหวตบนฟอร์มเป็น 0 (ต้องกดบันทึกการแก้ไขด้วยเพื่อส่งขึ้นฐานข้อมูล)
+        function resetVotes() {
+            if (!confirm("ต้องการรีเซ็ตตัวเลขคะแนนโหวตบนฟอร์มเป็น 0 ใช่หรือไม่? (กดปุ่ม 'บันทึกการแก้ไข' เพื่อยืนยันอีกครั้ง)")) return;
+            document.getElementById("vote_home").value = 0;
+            document.getElementById("vote_away").value = 0;
+            document.getElementById("vote_over").value = 0;
+            document.getElementById("vote_under").value = 0;
+            showStatus("รีเซ็ตตัวเลขเป็น 0 แล้ว กรุณากดปุ่ม 'บันทึกการแก้ไข' ด้านล่างเพื่ออัปเดตหน้าเว็บ", true);
+        }
+
+        // ฟังก์ชันแสดงข้อความสถานะ
+        function showStatus(msg, isSuccess) {
+            const el = document.getElementById("status-msg");
+            el.innerText = msg;
+            el.className = `p-3 rounded-xl text-center text-sm font-bold block ${isSuccess ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`;
+            setTimeout(() => { el.classList.add("hidden"); }, 5000);
+        }
+
+        // ดึงข้อมูลทันทีเมื่อโหลดหน้าเว็บเสร็จ
+        window.onload = loadCurrentMatch;
+    </script>
+</body>
+</html>

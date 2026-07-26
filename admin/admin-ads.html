@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Board - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; font-family: 'Prompt', sans-serif; }
+        body { background: #f1f5f9; margin: 0; padding: 20px; color: #1e293b; }
+        .admin-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; font-size: 1.5rem; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: #334155; margin: 20px 0 10px 0; padding-left: 10px; border-left: 4px solid #3b82f6; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #475569; }
+        input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+        input[type="color"] { width: 100%; height: 40px; padding: 2px; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; }
+        .btn-group { display: flex; gap: 10px; margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        button { padding: 12px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-save { background: #10b981; color: white; flex: 2; }
+        .btn-save:hover { background: #059669; }
+        .btn-reset { background: #ef4444; color: white; flex: 1; }
+        .btn-reset:hover { background: #dc2626; }
+        .btn-new { background: #3b82f6; color: white; flex: 1; }
+        .btn-new:hover { background: #2563eb; }
+        #status-msg { margin-top: 15px; padding: 10px; border-radius: 6px; text-align: center; display: none; font-weight: 600; }
+        .success { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .error { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h1><i class="fa-solid fa-gear"></i> ระบบหลังบ้าน Hero Board</h1>
+    
+    <form id="admin-form" onsubmit="return false;">
+        <input type="hidden" id="match_id">
+
+        <div class="section-title">ข้อมูลทัวร์นาเมนต์ & ราคาต่อรอง</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>ชื่อลีก / ทัวร์นาเมนต์</label>
+                <input type="text" id="league_name" required>
+            </div>
+            <div class="form-group">
+                <label>เวลาแข่งขัน (เช่น 23:30 น.)</label>
+                <input type="text" id="match_time" required>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>ราคาต่อรอง (เช่น เสมอ / 2.5)</label>
+                <input type="text" id="odds_text" required>
+            </div>
+            <div class="form-group">
+                <label>URL โลโก้ลีก</label>
+                <input type="text" id="league_logo" required>
+            </div>
+        </div>
+
+        <div class="section-title">ทีมเจ้าบ้าน (Home Team)</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>ชื่อทีมเจ้าบ้าน</label>
+                <input type="text" id="home_name" required>
+            </div>
+            <div class="form-group">
+                <label>สีประจำทีมเจ้าบ้าน</label>
+                <input type="color" id="home_color">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>URL โลโก้ธงทีมเจ้าบ้าน</label>
+                <input type="text" id="home_flag" required>
+            </div>
+            <div class="form-group">
+                <label>URL รูปนักเตะเจ้าบ้าน (PNG)</label>
+                <input type="text" id="home_player" required>
+            </div>
+        </div>
+
+        <div class="section-title">ทีมเยือน (Away Team)</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>ชื่อทีมเยือน</label>
+                <input type="text" id="away_name" required>
+            </div>
+            <div class="form-group">
+                <label>สีประจำทีมเยือน</label>
+                <input type="color" id="away_color">
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>URL โลโก้ธงทีมเยือน</label>
+                <input type="text" id="away_flag" required>
+            </div>
+            <div class="form-group">
+                <label>URL รูปนักเตะเยือน (PNG)</label>
+                <input type="text" id="away_player" required>
+            </div>
+        </div>
+
+        <div class="section-title">จัดการคะแนนโหวต</div>
+        <div class="grid-4">
+            <div class="form-group">
+                <label>โหวตเจ้าบ้าน</label>
+                <input type="number" id="vote_home" min="0">
+            </div>
+            <div class="form-group">
+                <label>โหวตทีมเยือน</label>
+                <input type="number" id="vote_away" min="0">
+            </div>
+            <div class="form-group">
+                <label>โหวตสกอร์สูง</label>
+                <input type="number" id="vote_over" min="0">
+            </div>
+            <div class="form-group">
+                <label>โหวตสกอร์ต่ำ</label>
+                <input type="number" id="vote_under" min="0">
+            </div>
+        </div>
+
+        <div id="status-msg"></div>
+
+        <div class="btn-group">
+            <button type="button" class="btn-reset" onclick="resetVotes()"><i class="fa-solid fa-rotate-left"></i> รีเซ็ตโหวตเป็น 0</button>
+            <button type="button" class="btn-new" onclick="createNewMatch()"><i class="fa-solid fa-plus"></i> ขึ้นแมตช์ใหม่</button>
+            <button type="button" class="btn-save" onclick="updateMatch()"><i class="fa-solid fa-floppy-disk"></i> บันทึกการเปลี่ยนแปลง</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const DB_URL = ""https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1/tbl_hero_board";
+    const API_KEY = "sb_publishable_mEO4n-ep4h5aP6FYZKC3yA_7KikwCCa";
+    
+    const headers = {
+        "apikey": API_KEY,
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
+    };
+
+    // 1. โหลดข้อมูลแมตช์ล่าสุดมาแสดงบนฟอร์ม
+    async function loadCurrentData() {
+        try {
+            const res = await fetch(`${DB_URL}?order=id.desc&limit=1`, { headers });
+            const data = await res.json();
+            if (!data || data.length === 0) return;
+
+            const d = data[0];
+            document.getElementById("match_id").value = d.id;
+            document.getElementById("league_name").value = d.league_name;
+            document.getElementById("match_time").value = d.match_time;
+            document.getElementById("odds_text").value = d.odds_text;
+            document.getElementById("league_logo").value = d.league_logo;
+
+            document.getElementById("home_name").value = d.home_name;
+            document.getElementById("home_color").value = d.home_color;
+            document.getElementById("home_flag").value = d.home_flag;
+            document.getElementById("home_player").value = d.home_player;
+
+            document.getElementById("away_name").value = d.away_name;
+            document.getElementById("away_color").value = d.away_color;
+            document.getElementById("away_flag").value = d.away_flag;
+            document.getElementById("away_player").value = d.away_player;
+
+            document.getElementById("vote_home").value = d.vote_home;
+            document.getElementById("vote_away").value = d.vote_away;
+            document.getElementById("vote_over").value = d.vote_over;
+            document.getElementById("vote_under").value = d.vote_under;
+        } catch (e) {
+            showStatus("ไม่สามารถดึงข้อมูลได้: " + e.message, false);
+        }
+    }
+
+    // 2. ดึงข้อมูลจากฟอร์มเพื่อเตรียมส่ง
+    function getFormData() {
+        return {
+            league_name: document.getElementById("league_name").value,
+            match_time: document.getElementById("match_time").value,
+            odds_text: document.getElementById("odds_text").value,
+            league_logo: document.getElementById("league_logo").value,
+            home_name: document.getElementById("home_name").value,
+            home_color: document.getElementById("home_color").value,
+            home_flag: document.getElementById("home_flag").value,
+            home_player: document.getElementById("home_player").value,
+            away_name: document.getElementById("away_name").value,
+            away_color: document.getElementById("away_color").value,
+            away_flag: document.getElementById("away_flag").value,
+            away_player: document.getElementById("away_player").value,
+            vote_home: parseInt(document.getElementById("vote_home").value) || 0,
+            vote_away: parseInt(document.getElementById("vote_away").value) || 0,
+            vote_over: parseInt(document.getElementById("vote_over").value) || 0,
+            vote_under: parseInt(document.getElementById("vote_under").value) || 0,
+        };
+    }
+
+    // 3. บันทึกการแก้ไข (อัปเดตข้อมูลแมตช์ปัจจุบัน)
+    async function updateMatch() {
+        const id = document.getElementById("match_id").value;
+        if (!id) return alert("ไม่พบ ID ข้อมูล");
+
+        try {
+            const res = await fetch(`${DB_URL}?id=eq.${id}`, {
+                method: "PATCH",
+                headers: headers,
+                body: JSON.stringify(getFormData())
+            });
+            if (res.ok) {
+                showStatus("บันทึกการแก้ไขเรียบร้อยแล้ว!", true);
+                loadCurrentData();
+            } else {
+                showStatus("เกิดข้อผิดพลาดในการบันทึก", false);
+            }
+        } catch (e) {
+            showStatus("Error: " + e.message, false);
+        }
+    }
+
+    // 4. ขึ้นแมตช์ใหม่ (สร้างแถวใหม่ในฐานข้อมูลและเริ่มโหวตที่ 0)
+    async function createNewMatch() {
+        if (!confirm("คุณต้องการสร้างแมตช์ใหม่และตั้งค่าโหวตทั้งหมดเป็น 0 ใช่หรือไม่?")) return;
+
+        const payload = getFormData();
+        payload.vote_home = 0;
+        payload.vote_away = 0;
+        payload.vote_over = 0;
+        payload.vote_under = 0;
+
+        try {
+            const res = await fetch(DB_URL, {
+                method: "POST",
+                headers: headers,
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                showStatus("สร้างแมตช์ใหม่สำเร็จแล้ว!", true);
+                loadCurrentData();
+            } else {
+                showStatus("เกิดข้อผิดพลาดในการสร้างแมตช์ใหม่", false);
+            }
+        } catch (e) {
+            showStatus("Error: " + e.message, false);
+        }
+    }
+
+    // 5. รีเซ็ตเฉพาะคะแนนโหวตของแมตช์ปัจจุบันเป็น 0
+    async function resetVotes() {
+        if (!confirm("ต้องการรีเซ็ตคะแนนโหวตทั้งหมดเป็น 0 ใช่หรือไม่?")) return;
+        document.getElementById("vote_home").value = 0;
+        document.getElementById("vote_away").value = 0;
+        document.getElementById("vote_over").value = 0;
+        document.getElementById("vote_under").value = 0;
+        updateMatch();
+    }
+
+    // แสดงข้อความสถานะ
+    function showStatus(msg, isSuccess) {
+        const el = document.getElementById("status-msg");
+        el.innerText = msg;
+        el.className = isSuccess ? "success" : "error";
+        el.style.display = "block";
+        setTimeout(() => el.style.display = "none", 4000);
+    }
+
+    // โหลดข้อมูลทันทีเมื่อเปิดหน้า
+    loadCurrentData();
+</script>
+</body>
+</html>

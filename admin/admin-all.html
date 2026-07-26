@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Master Admin Dashboard - ระบบจัดการเว็บแบบครบวงจร</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        font-family: "Prompt", sans-serif;
+      }
+      input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        cursor: pointer;
+      }
+      input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+      input[type="color"]::-webkit-color-swatch {
+        border-radius: 0.5rem;
+        border: 1px solid #3f3f46;
+      }
+      .menu-item.active {
+        background: linear-gradient(
+          135deg,
+          rgba(212, 175, 55, 0.2) 0%,
+          rgba(212, 175, 55, 0.05) 100%
+        );
+        border-left: 4px solid #d4af37;
+        color: #d4af37;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body class="bg-[#09090c] text-zinc-100 min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+      <!-- ==========================================
+             ส่วนหัวเว็บ Master Admin (ดีไซน์ใหม่: เมนู 3 ขีด)
+        =========================================== -->
+      <div
+        class="flex justify-between items-center border-b border-zinc-800 pb-5 mb-8 relative"
+      >
+        <div>
+          <h1
+            class="text-xl md:text-2xl font-black text-[#D4AF37] flex items-center gap-2.5"
+          >
+            <i class="fas fa-cogs"></i> ระบบหลังบ้าน TOPFORM369
+          </h1>
+          <p
+            class="text-[11px] md:text-xs text-zinc-400 mt-0.5 hidden sm:block"
+          >
+            ศูนย์รวมจัดการป้ายโฆษณา บอร์ดโหวตบอล และตารางแข่ง Cyber-Gold
+          </p>
+        </div>
+
+        <!-- ส่วนควบคุมเมนูมุมขวา -->
+        <div class="flex items-center gap-3">
+          <!-- ป้ายบอกสถานะว่ากำลังเปิดระบบไหนอยู่ -->
+          <div
+            class="bg-[#121216] border border-zinc-800 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 text-zinc-300"
+          >
+            <span
+              class="w-2 h-2 rounded-full bg-green-400 animate-pulse"
+            ></span>
+            <span class="text-zinc-500 hidden md:inline">กำลังจัดการ:</span>
+            <span id="current-system-label" class="text-[#D4AF37] font-bold"
+              >ป้ายโฆษณา (Banner Ads)</span
+            >
+          </div>
+
+          <!-- ปุ่ม 3 ขีด (Hamburger Button) -->
+          <button
+            onclick="toggleMenu()"
+            id="hamburger-btn"
+            class="bg-gradient-to-r from-[#D4AF37] to-[#aa8c2c] hover:opacity-90 text-black w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-[0_0_15px_rgba(212,175,55,0.3)] transition active:scale-95"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+
+        <!-- หน้าต่างเมนูดรอปดาวน์ (Dropdown Menu) -->
+        <div
+          id="dropdown-menu"
+          class="hidden absolute right-0 top-16 w-64 bg-[#141419]/95 border border-zinc-700/80 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-md transition-all duration-200"
+        >
+          <div
+            class="p-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/80 px-4 py-2"
+          >
+            เลือกแถบระบบที่ต้องการ
+          </div>
+          <div class="p-1.5 space-y-1">
+            <button
+              onclick="switchTab('ads', 'ป้ายโฆษณา (Banner Ads)')"
+              id="menu-btn-ads"
+              class="menu-item active w-full text-left px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 hover:bg-zinc-800/60 transition text-zinc-300"
+            >
+              <i class="fas fa-ad text-sm w-5 text-center"></i>
+              <span>ป้ายโฆษณา (Banner Ads)</span>
+            </button>
+            <button
+              onclick="switchTab('hero', 'บอร์ดโหวตฟุตบอล (Hero Board)')"
+              id="menu-btn-hero"
+              class="menu-item w-full text-left px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 hover:bg-zinc-800/60 transition text-zinc-300"
+            >
+              <i class="fas fa-trophy text-sm w-5 text-center"></i>
+              <span>บอร์ดโหวตบอล (Hero Board)</span>
+            </button>
+            <button
+              onclick="switchTab('worldcup', 'ตารางแข่ง Cyber-Gold')"
+              id="menu-btn-worldcup"
+              class="menu-item w-full text-left px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-3 hover:bg-zinc-800/60 transition text-zinc-300"
+            >
+              <i class="fas fa-calendar-alt text-sm w-5 text-center"></i>
+              <span>ตารางแข่ง (Cyber-Gold)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+             TAB 1: ระบบจัดการป้ายโฆษณา (Banner Ads)
+        =========================================== -->
+      <div id="tab-content-ads" class="tab-content block space-y-8">
+        <div
+          class="flex justify-between items-center bg-[#121216] px-6 py-4 rounded-2xl border border-zinc-800"
+        >
+          <h2
+            class="text-base font-bold text-[#D4AF37] flex items-center gap-2"
+          >
+            <i class="fas fa-ad"></i> ระบบจัดการป้ายโฆษณา (Banner Ads)
+          </h2>
+          <button
+            onclick="fetchBanners()"
+            class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border border-zinc-700 transition"
+          >
+            <i class="fas fa-sync-alt"></i> รีเฟรชป้าย
+          </button>
+        </div>
+
+        <div
+          id="form-card-ads"
+          class="bg-[#121216] p-6 rounded-2xl border border-zinc-800 shadow-xl transition-all duration-300"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h3
+              id="form-title-ads"
+              class="text-base font-bold text-white flex items-center gap-2"
+            >
+              <i class="fas fa-plus-circle text-[#D4AF37]"></i>
+              เพิ่มป้ายโฆษณาใหม่
+            </h3>
+            <button
+              type="button"
+              id="btn-cancel-edit-ads"
+              onclick="cancelEditAds()"
+              class="hidden bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1 rounded text-xs font-semibold"
+            >
+              <i class="fas fa-times"></i> ยกเลิกการแก้ไข
+            </button>
+          </div>
+          <form
+            id="bannerForm"
+            onsubmit="saveBanner(event)"
+            class="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <input type="hidden" id="edit_id_ads" value="" />
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ชื่อผู้สนับสนุน / ชื่อป้าย *</label
+              >
+              <input
+                type="text"
+                id="title_ads"
+                required
+                placeholder="เช่น UFA สล็อตเว็บตรง"
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
+              />
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ลำดับการแสดงผล (เลขน้อยขึ้นก่อน) *</label
+              >
+              <input
+                type="number"
+                id="sort_order_ads"
+                value="1"
+                required
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
+              />
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ลิงก์รูปภาพ (Image URL) *</label
+              >
+              <input
+                type="url"
+                id="image_url_ads"
+                required
+                placeholder="https://..."
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
+              />
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ลิงก์เมื่อกดคลิก (Target URL) *</label
+              >
+              <input
+                type="url"
+                id="target_url_ads"
+                required
+                placeholder="https://..."
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-[#D4AF37]"
+              />
+            </div>
+            <div class="md:col-span-2 mt-2">
+              <button
+                type="submit"
+                id="btn-submit-ads"
+                class="w-full bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] hover:opacity-90 text-black font-extrabold py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2"
+              >
+                <i class="fas fa-save mr-1"></i>
+                <span>บันทึกและนำไปแสดงบนหน้าเว็บทันที</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div
+          class="bg-[#121216] p-6 rounded-2xl border border-zinc-800 shadow-xl"
+        >
+          <h3 class="text-base font-bold text-white mb-4">
+            ป้ายโฆษณาทั้งหมดในระบบ
+          </h3>
+          <div id="banner-list" class="space-y-4">
+            <p class="text-center text-zinc-500 py-8">กำลังโหลดข้อมูล...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==========================================
+             TAB 2: ระบบจัดการบอร์ดโหวตฟุตบอล (Hero Board)
+        =========================================== -->
+      <div id="tab-content-hero" class="tab-content hidden space-y-8">
+        <div
+          class="flex justify-between items-center bg-[#121216] px-6 py-4 rounded-2xl border border-zinc-800"
+        >
+          <h2
+            class="text-base font-bold text-[#D4AF37] flex items-center gap-2"
+          >
+            <i class="fas fa-trophy"></i> ระบบจัดการบอร์ดโหวตฟุตบอล (Hero Board)
+          </h2>
+          <button
+            onclick="loadCurrentHeroMatch()"
+            class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border border-zinc-700 transition"
+          >
+            <i class="fas fa-sync-alt"></i> ดึงข้อมูลล่าสุด
+          </button>
+        </div>
+
+        <div
+          class="bg-[#121216] p-6 md:p-8 rounded-2xl border border-zinc-800 shadow-xl"
+        >
+          <form id="heroForm" onsubmit="return false;" class="space-y-6">
+            <input type="hidden" id="hero_match_id" />
+            <div>
+              <h3
+                class="text-sm font-bold text-blue-400 border-l-4 border-blue-500 pl-3 mb-4 flex items-center gap-2"
+              >
+                <i class="fas fa-flag-checkered"></i> ข้อมูลทัวร์นาเมนต์ &
+                ราคาต่อรอง
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >ชื่อลีก / ทัวร์นาเมนต์</label
+                  ><input
+                    type="text"
+                    id="hero_league_name"
+                    required
+                    placeholder="เช่น PREMIER LEAGUE"
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >เวลาแข่งขัน</label
+                  ><input
+                    type="text"
+                    id="hero_match_time"
+                    required
+                    placeholder="เช่น 23:30 น."
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >ราคาต่อรอง / ทรรศนะ</label
+                  ><input
+                    type="text"
+                    id="hero_odds_text"
+                    required
+                    placeholder="เช่น เสมอ / 2.5"
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >URL โลโก้ถ้วยรางวัล / ลีก</label
+                  ><input
+                    type="url"
+                    id="hero_league_logo"
+                    required
+                    placeholder="https://..."
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3
+                class="text-sm font-bold text-red-400 border-l-4 border-red-500 pl-3 mb-4 flex items-center gap-2"
+              >
+                <i class="fas fa-home"></i> ทีมเจ้าบ้าน (Home Team)
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >ชื่อทีมเจ้าบ้าน</label
+                  ><input
+                    type="text"
+                    id="hero_home_name"
+                    required
+                    placeholder="เช่น ARSENAL"
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >สีประจำทีม</label
+                  ><input
+                    type="color"
+                    id="hero_home_color"
+                    value="#EF0107"
+                    class="w-full h-[42px] bg-[#1a1a20] border border-zinc-700 rounded-lg p-1"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >URL โลโก้ / ธงทีม</label
+                  ><input
+                    type="url"
+                    id="hero_home_flag"
+                    required
+                    placeholder="https://..."
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >URL รูปนักเตะ (PNG พื้นหลังใส)</label
+                  ><input
+                    type="url"
+                    id="hero_home_player"
+                    required
+                    placeholder="https://..."
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3
+                class="text-sm font-bold text-cyan-400 border-l-4 border-cyan-500 pl-3 mb-4 flex items-center gap-2"
+              >
+                <i class="fas fa-plane"></i> ทีมเยือน (Away Team)
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >ชื่อทีมเยือน</label
+                  ><input
+                    type="text"
+                    id="hero_away_name"
+                    required
+                    placeholder="เช่น CHELSEA"
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >สีประจำทีม</label
+                  ><input
+                    type="color"
+                    id="hero_away_color"
+                    value="#034694"
+                    class="w-full h-[42px] bg-[#1a1a20] border border-zinc-700 rounded-lg p-1"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >URL โลโก้ / ธงทีม</label
+                  ><input
+                    type="url"
+                    id="hero_away_flag"
+                    required
+                    placeholder="https://..."
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                    >URL รูปนักเตะ (PNG พื้นหลังใส)</label
+                  ><input
+                    type="url"
+                    id="hero_away_player"
+                    required
+                    placeholder="https://..."
+                    class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3
+                class="text-sm font-bold text-amber-400 border-l-4 border-amber-500 pl-3 mb-4 flex items-center justify-between"
+              >
+                <span class="flex items-center gap-2"
+                  ><i class="fas fa-chart-bar"></i> ปรับแต่งคะแนนโหวต</span
+                >
+                <button
+                  type="button"
+                  onclick="resetHeroVotes()"
+                  class="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded transition"
+                >
+                  <i class="fas fa-rotate-left mr-1"></i> รีเซ็ตโหวตเป็น 0
+                </button>
+              </h3>
+              <div
+                class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#181820] p-4 rounded-xl border border-zinc-800"
+              >
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1"
+                    >โหวตเจ้าบ้าน</label
+                  ><input
+                    type="number"
+                    id="hero_vote_home"
+                    min="0"
+                    class="w-full bg-[#121216] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1"
+                    >โหวตทีมเยือน</label
+                  ><input
+                    type="number"
+                    id="hero_vote_away"
+                    min="0"
+                    class="w-full bg-[#121216] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1"
+                    >โหวตสกอร์สูง</label
+                  ><input
+                    type="number"
+                    id="hero_vote_over"
+                    min="0"
+                    class="w-full bg-[#121216] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs text-zinc-400 block mb-1"
+                    >โหวตสกอร์ต่ำ</label
+                  ><input
+                    type="number"
+                    id="hero_vote_under"
+                    min="0"
+                    class="w-full bg-[#121216] border border-zinc-700 rounded-lg p-2 text-sm text-white text-center font-bold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="status-msg-hero"
+              class="hidden p-3 rounded-xl text-center text-sm font-bold"
+            ></div>
+
+            <div
+              class="flex flex-col md:flex-row gap-4 pt-4 border-t border-zinc-800"
+            >
+              <button
+                type="button"
+                onclick="createNewHeroMatch()"
+                class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2"
+              >
+                <i class="fas fa-plus-circle"></i>
+                <span>ขึ้นแมตช์ใหม่ (สร้างรายการใหม่)</span>
+              </button>
+              <button
+                type="button"
+                onclick="updateHeroMatch()"
+                class="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] hover:opacity-90 text-black font-extrabold py-3 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2"
+              >
+                <i class="fas fa-save"></i>
+                <span>บันทึกการแก้ไข (อัปเดตแมตช์เดิม)</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ==========================================
+             TAB 3: ระบบจัดการตารางแข่ง Cyber-Gold Board
+        =========================================== -->
+      <div id="tab-content-worldcup" class="tab-content hidden space-y-8">
+        <div
+          class="flex justify-between items-center bg-[#121216] px-6 py-4 rounded-2xl border border-zinc-800"
+        >
+          <h2
+            class="text-base font-bold text-[#D4AF37] flex items-center gap-2"
+          >
+            <i class="fas fa-calendar-alt"></i> ระบบจัดการตารางแข่ง (Cyber-Gold
+            Board)
+          </h2>
+          <button
+            onclick="loadWorldCupData()"
+            class="bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border border-zinc-700 transition"
+          >
+            <i class="fas fa-sync-alt"></i> ดึงข้อมูลล่าสุด
+          </button>
+        </div>
+
+        <input type="hidden" id="wc_record_id" />
+
+        <div
+          class="bg-[#121216] p-6 rounded-2xl border border-zinc-800 shadow-xl"
+        >
+          <h3
+            class="text-sm font-bold text-amber-400 border-l-4 border-amber-500 pl-3 mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-sliders-h"></i> 1. ตั้งค่าหัวข้อ & เวลานับถอยหลัง
+            (Countdown)
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >หัวข้อหลักบนบอร์ด</label
+              ><input
+                type="text"
+                id="wc_header_title"
+                placeholder="เช่น โปรแกรมฟุตบอลเดือดวันนี้"
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white font-bold"
+              />
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ป้ายนับจำนวน (สีทอง)</label
+              ><input
+                type="text"
+                id="wc_today_count"
+                placeholder="เช่น วันนี้ 5 คู่"
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+              />
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ข้อความรอง (รายละเอียดลีก)</label
+              ><input
+                type="text"
+                id="wc_upcoming_count"
+                placeholder="เช่น พรีเมียร์ลีก & ลาลีกา"
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+              />
+            </div>
+            <div class="md:col-span-1">
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >เวลานับถอยหลัง (ปี-เดือน-วัน ชั่วโมง:นาที:วินาที)</label
+              ><input
+                type="text"
+                id="wc_countdown_target"
+                placeholder="เช่น 2026-08-01 20:00:00"
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white font-mono font-bold text-yellow-300"
+              />
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-xs text-zinc-400 block mb-1 font-semibold"
+                >ลิงก์ปุ่ม "ดูโปรแกรมการแข่งขันทั้งหมด" (URL หรือ iframe)</label
+              ><input
+                type="text"
+                id="wc_iframe_code"
+                placeholder="https://..."
+                class="w-full bg-[#1a1a20] border border-zinc-700 rounded-lg p-2.5 text-sm text-white"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="bg-[#121216] p-6 rounded-2xl border border-zinc-800 shadow-xl"
+        >
+          <h3
+            class="text-sm font-bold text-cyan-400 border-l-4 border-cyan-500 pl-3 mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-plus-circle"></i> 2. เพิ่มรายการแข่งขัน
+            (คู่บอลที่จะโชว์ในการ์ดสไลด์)
+          </h3>
+          <form
+            id="wcMatchForm"
+            onsubmit="addWorldCupMatch(event)"
+            class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-[#181820] p-4 rounded-xl border border-zinc-800"
+          >
+            <div>
+              <label class="text-[11px] text-zinc-400 block mb-1"
+                >วันที่ / ช่วงเวลา</label
+              ><input
+                type="text"
+                id="wcm_date"
+                required
+                placeholder="เช่น วันนี้, คืนนี้"
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label class="text-[11px] text-zinc-400 block mb-1"
+                >ป้ายลีก / สถานะ (Badge)</label
+              ><input
+                type="text"
+                id="wcm_badge"
+                required
+                placeholder="เช่น LIVE, BIG MATCH"
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label class="text-[11px] text-zinc-400 block mb-1"
+                >เวลาแข่งขัน</label
+              ><input
+                type="text"
+                id="wcm_time"
+                required
+                placeholder="เช่น 23:30 น."
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div>
+              <label class="text-[11px] text-zinc-400 block mb-1"
+                >เซียนเลือก (เจ้าบ้านชนะ %)</label
+              ><input
+                type="number"
+                id="wcm_rate"
+                min="1"
+                max="99"
+                value="60"
+                required
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white text-center font-bold text-yellow-400"
+              />
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <label class="text-[11px] text-red-400 font-bold block mb-1"
+                >ชื่อทีมเจ้าบ้าน</label
+              ><input
+                type="text"
+                id="wcm_hname"
+                required
+                placeholder="เช่น ARSENAL"
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <label class="text-[11px] text-red-400 font-bold block mb-1"
+                >URL โลโก้/ธง เจ้าบ้าน</label
+              ><input
+                type="url"
+                id="wcm_hflag"
+                required
+                placeholder="https://..."
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <label class="text-[11px] text-blue-400 font-bold block mb-1"
+                >ชื่อทีมเยือน</label
+              ><input
+                type="text"
+                id="wcm_aname"
+                required
+                placeholder="เช่น CHELSEA"
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div class="col-span-2 md:col-span-1">
+              <label class="text-[11px] text-blue-400 font-bold block mb-1"
+                >URL โลโก้/ธง ทีมเยือน</label
+              ><input
+                type="url"
+                id="wcm_aflag"
+                required
+                placeholder="https://..."
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div class="col-span-2 md:col-span-3">
+              <label class="text-[11px] text-zinc-400 block mb-1"
+                >ลิงก์วิเคราะห์บอล (เมื่อกดปุ่มวิเคราะห์)</label
+              ><input
+                type="url"
+                id="wcm_url"
+                required
+                placeholder="https://..."
+                class="w-full bg-[#0d0d11] border border-zinc-700 rounded-lg p-2 text-xs text-white"
+              />
+            </div>
+            <div class="col-span-2 md:col-span-1 flex items-end">
+              <button
+                type="submit"
+                class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-3 rounded-lg text-xs transition flex justify-center items-center gap-1 shadow-md"
+              >
+                <i class="fas fa-plus"></i> เพิ่มเข้าตารางรายการ
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div
+          class="bg-[#121216] p-6 rounded-2xl border border-zinc-800 shadow-xl"
+        >
+          <h3
+            class="text-base font-bold text-white mb-4 flex justify-between items-center"
+          >
+            <span
+              ><i class="fas fa-list text-yellow-500 mr-2"></i> 3.
+              รายการแข่งขันในระบบขณะนี้</span
+            >
+            <span
+              id="wc-match-count-badge"
+              class="bg-zinc-800 px-2 py-0.5 rounded text-xs text-zinc-400"
+              >0 คู่</span
+            >
+          </h3>
+          <div id="wc-matches-list-container" class="space-y-3">
+            <p class="text-center text-zinc-500 py-6 text-sm">
+              กำลังโหลดข้อมูลรายการแข่ง...
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="status-msg-wc"
+          class="hidden p-3 rounded-xl text-center text-sm font-bold mb-4"
+        ></div>
+
+        <div
+          class="sticky bottom-4 bg-[#181820]/90 p-4 rounded-2xl border border-amber-500/30 shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4"
+        >
+          <span class="text-xs text-zinc-300"
+            >💡 เมื่อตั้งค่าหรือเพิ่มลบคู่บอลเสร็จแล้ว
+            <strong class="text-yellow-400 font-bold"
+              >อย่าลืมกดปุ่มบันทึกใหญ่ด้านขวา</strong
+            >
+            เพื่ออัปเดตหน้าเว็บจริงครับ!</span
+          >
+          <button
+            onclick="saveAllWorldCupToSupabase()"
+            class="w-full md:w-auto bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#D4AF37] hover:opacity-90 text-black font-extrabold py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.4)] transition flex justify-center items-center gap-2 text-base"
+          >
+            <i class="fas fa-save"></i>
+            <span>บันทึกตารางแข่งทั้งหมดขึ้นเว็บจริง</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT คุมระบบหลังบ้านทั้งหมด
+    =========================================== -->
+    <script>
+      // 🔑 ตั้งค่า API กลาง (ใช้โปรเจกต์ของคุณทั้งหมด)
+      const BASE_URL = "https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1";
+      const API_KEY = "sb_publishable_mEO4n-ep4h5aP6FYZKC3yA_7KikwCCa";
+      const headers = {
+        apikey: API_KEY,
+        Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      };
+
+      // ==========================================
+      // 0. ระบบเมนู 3 ขีด & สลับหน้าต่าง (Dropdown & Tabs)
+      // ==========================================
+      function toggleMenu() {
+        const menu = document.getElementById("dropdown-menu");
+        menu.classList.toggle("hidden");
+      }
+
+      function switchTab(tabId, labelName) {
+        // ซ่อนเนื้อหาทั้งหมด แล้วเปิดเฉพาะตัวที่เลือก
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.add("hidden"));
+        document
+          .getElementById(`tab-content-${tabId}`)
+          .classList.remove("hidden");
+
+        // เปลี่ยนสีปุ่มในเมนูดรอปดาวน์ให้รู้ว่าเลือกตัวไหนอยู่
+        document
+          .querySelectorAll(".menu-item")
+          .forEach((btn) => btn.classList.remove("active"));
+        document.getElementById(`menu-btn-${tabId}`).classList.add("active");
+
+        // เปลี่ยนข้อความบนป้ายบอกสถานะด้านบน
+        document.getElementById("current-system-label").innerText = labelName;
+
+        // พับเก็บหน้าต่างเมนูทันทีเมื่อเลือกเสร็จ
+        document.getElementById("dropdown-menu").classList.add("hidden");
+
+        // โหลดข้อมูลของระบบที่เลือก
+        if (tabId === "ads") fetchBanners();
+        else if (tabId === "hero") loadCurrentHeroMatch();
+        else if (tabId === "worldcup") loadWorldCupData();
+      }
+
+      // คลิกพื้นที่อื่นนอกเมนู ให้พับเมนูเก็บเองอัตโนมัติ
+      document.addEventListener("click", function (e) {
+        const menu = document.getElementById("dropdown-menu");
+        const btn = document.getElementById("hamburger-btn");
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+          menu.classList.add("hidden");
+        }
+      });
+
+      // ==========================================
+      // 1. ตรรกะระบบป้ายโฆษณา (Banner Ads)
+      // ==========================================
+      async function fetchBanners() {
+        const list = document.getElementById("banner-list");
+        try {
+          const res = await fetch(
+            `${BASE_URL}/tbl_banners?order=sort_order.asc`,
+            { headers }
+          );
+          const data = await res.json();
+          if (!data || data.length === 0) {
+            list.innerHTML = `<p class="text-center text-zinc-500 py-8">ยังไม่มีป้ายโฆษณาในระบบ</p>`;
+            return;
+          }
+          let html = "";
+          data.forEach((ad) => {
+            const adDataStr = encodeURIComponent(JSON.stringify(ad));
+            html += `
+                        <div class="bg-[#1a1a20] border ${
+                          ad.is_active
+                            ? "border-zinc-700"
+                            : "border-red-900/50 opacity-60"
+                        } p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="w-full md:w-48 shrink-0 bg-black/50 p-1 rounded border border-zinc-800"><img src="${
+                              ad.image_url
+                            }" alt="banner" class="w-full h-16 object-cover rounded" onerror="this.src='https://via.placeholder.com/400x100?text=Image+Error'"></div>
+                            <div class="flex-grow text-center md:text-left">
+                                <div class="flex items-center justify-center md:justify-start gap-2"><span class="font-bold text-white text-base">${
+                                  ad.title
+                                }</span><span class="text-xs px-2 py-0.5 rounded font-mono ${
+              ad.is_active
+                ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                : "bg-red-500/20 text-red-400 border border-red-500/30"
+            }">${ad.is_active ? "● กำลังแสดงผล" : "○ ปิดการแสดงผล"}</span></div>
+                                <p class="text-xs text-zinc-400 mt-1 truncate max-w-md"><i class="fas fa-link text-zinc-600"></i> ${
+                                  ad.target_url
+                                }</p>
+                                <p class="text-[11px] text-zinc-500 mt-0.5">ลำดับการแสดงผล: <strong class="text-[#D4AF37]">${
+                                  ad.sort_order
+                                }</strong></p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0 w-full md:w-auto justify-end border-t md:border-t-0 pt-3 md:pt-0 border-zinc-800">
+                                <button onclick="editBannerAds('${adDataStr}')" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1"><i class="fas fa-edit"></i> แก้ไข</button>
+                                <button onclick="toggleActiveAds(${ad.id}, ${
+              ad.is_active
+            })" class="px-3 py-1.5 rounded-lg text-xs font-bold ${
+              ad.is_active
+                ? "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+                : "bg-green-500/10 text-green-400 hover:bg-green-500/20"
+            } transition">${
+              ad.is_active
+                ? '<i class="fas fa-eye-slash"></i> ปิด'
+                : '<i class="fas fa-eye"></i> เปิด'
+            }</button>
+                                <button onclick="deleteBannerAds(${
+                                  ad.id
+                                })" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-trash"></i> ลบ</button>
+                            </div>
+                        </div>`;
+          });
+          list.innerHTML = html;
+        } catch (e) {
+          list.innerHTML = `<p class="text-red-400 text-center py-4">โหลดข้อมูลไม่สำเร็จ: ${e.message}</p>`;
+        }
+      }
+
+      function editBannerAds(encodedData) {
+        const ad = JSON.parse(decodeURIComponent(encodedData));
+        document.getElementById("edit_id_ads").value = ad.id;
+        document.getElementById("title_ads").value = ad.title;
+        document.getElementById("sort_order_ads").value = ad.sort_order;
+        document.getElementById("image_url_ads").value = ad.image_url;
+        document.getElementById("target_url_ads").value = ad.target_url;
+        document.getElementById(
+          "form-title-ads"
+        ).innerHTML = `<i class="fas fa-edit text-blue-400"></i> แก้ไขป้ายโฆษณา: <span class="text-blue-400">${ad.title}</span>`;
+        document
+          .getElementById("form-card-ads")
+          .classList.replace("border-zinc-800", "border-blue-500/50");
+        document
+          .getElementById("btn-cancel-edit-ads")
+          .classList.remove("hidden");
+        const btn = document.getElementById("btn-submit-ads");
+        btn.className =
+          "w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:opacity-90 text-black font-extrabold py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2";
+        btn.innerHTML = `<i class="fas fa-check-circle"></i> <span>บันทึกการแก้ไข</span>`;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function cancelEditAds() {
+        document.getElementById("bannerForm").reset();
+        document.getElementById("edit_id_ads").value = "";
+        document.getElementById(
+          "form-title-ads"
+        ).innerHTML = `<i class="fas fa-plus-circle text-[#D4AF37]"></i> เพิ่มป้ายโฆษณาใหม่`;
+        document
+          .getElementById("form-card-ads")
+          .classList.replace("border-blue-500/50", "border-zinc-800");
+        document.getElementById("btn-cancel-edit-ads").classList.add("hidden");
+        const btn = document.getElementById("btn-submit-ads");
+        btn.className =
+          "w-full bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB] hover:opacity-90 text-black font-extrabold py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2";
+        btn.innerHTML = `<i class="fas fa-save mr-1"></i> <span>บันทึกและนำไปแสดงบนหน้าเว็บทันที</span>`;
+      }
+
+      async function saveBanner(e) {
+        e.preventDefault();
+        const editId = document.getElementById("edit_id_ads").value;
+        const payload = {
+          title: document.getElementById("title_ads").value,
+          image_url: document.getElementById("image_url_ads").value,
+          target_url: document.getElementById("target_url_ads").value,
+          sort_order:
+            parseInt(document.getElementById("sort_order_ads").value) || 1,
+        };
+        try {
+          let res;
+          if (editId)
+            res = await fetch(`${BASE_URL}/tbl_banners?id=eq.${editId}`, {
+              method: "PATCH",
+              headers,
+              body: JSON.stringify(payload),
+            });
+          else {
+            payload.is_active = true;
+            res = await fetch(`${BASE_URL}/tbl_banners`, {
+              method: "POST",
+              headers,
+              body: JSON.stringify(payload),
+            });
+          }
+          if (res.ok) {
+            cancelEditAds();
+            fetchBanners();
+            alert(
+              editId
+                ? "อัปเดตข้อมูลเรียบร้อยแล้ว!"
+                : "เพิ่มป้ายโฆษณาขึ้นหน้าเว็บเรียบร้อยแล้ว!"
+            );
+          } else alert("เกิดข้อผิดพลาดในการบันทึก");
+        } catch (e) {
+          alert("Error: " + e.message);
+        }
+      }
+
+      async function toggleActiveAds(id, currentStatus) {
+        try {
+          await fetch(`${BASE_URL}/tbl_banners?id=eq.${id}`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({ is_active: !currentStatus }),
+          });
+          fetchBanners();
+        } catch (e) {
+          alert("เปลี่ยนสถานะไม่สำเร็จ");
+        }
+      }
+      async function deleteBannerAds(id) {
+        if (!confirm("ต้องการลบป้ายโฆษณานี้ออกอย่างถาวรใช่หรือไม่?")) return;
+        try {
+          await fetch(`${BASE_URL}/tbl_banners?id=eq.${id}`, {
+            method: "DELETE",
+            headers,
+          });
+          fetchBanners();
+        } catch (e) {
+          alert("ลบไม่สำเร็จ");
+        }
+      }
+
+      // ==========================================
+      // 2. ตรรกะระบบบอร์ดโหวตฟุตบอล (Hero Board)
+      // ==========================================
+      async function loadCurrentHeroMatch() {
+        try {
+          const res = await fetch(
+            `${BASE_URL}/tbl_hero_board?order=id.desc&limit=1`,
+            { headers }
+          );
+          const data = await res.json();
+          if (!data || data.length === 0) {
+            showHeroStatus(
+              "ไม่พบข้อมูลการแข่งขันในระบบ กรุณาสร้างแมตช์ใหม่",
+              false
+            );
+            return;
+          }
+          const d = data[0];
+          document.getElementById("hero_match_id").value = d.id;
+          document.getElementById("hero_league_name").value =
+            d.league_name || "";
+          document.getElementById("hero_match_time").value = d.match_time || "";
+          document.getElementById("hero_odds_text").value = d.odds_text || "";
+          document.getElementById("hero_league_logo").value =
+            d.league_logo || "";
+          document.getElementById("hero_home_name").value = d.home_name || "";
+          document.getElementById("hero_home_color").value =
+            d.home_color || "#EF0107";
+          document.getElementById("hero_home_flag").value = d.home_flag || "";
+          document.getElementById("hero_home_player").value =
+            d.home_player || "";
+          document.getElementById("hero_away_name").value = d.away_name || "";
+          document.getElementById("hero_away_color").value =
+            d.away_color || "#034694";
+          document.getElementById("hero_away_flag").value = d.away_flag || "";
+          document.getElementById("hero_away_player").value =
+            d.away_player || "";
+          document.getElementById("hero_vote_home").value = d.vote_home || 0;
+          document.getElementById("hero_vote_away").value = d.vote_away || 0;
+          document.getElementById("hero_vote_over").value = d.vote_over || 0;
+          document.getElementById("hero_vote_under").value = d.vote_under || 0;
+          showHeroStatus("ดึงข้อมูลบอร์ดโหวตล่าสุดเรียบร้อยแล้ว", true);
+        } catch (e) {
+          showHeroStatus("Error: " + e.message, false);
+        }
+      }
+
+      function getHeroFormData() {
+        return {
+          league_name: document.getElementById("hero_league_name").value,
+          match_time: document.getElementById("hero_match_time").value,
+          odds_text: document.getElementById("hero_odds_text").value,
+          league_logo: document.getElementById("hero_league_logo").value,
+          home_name: document.getElementById("hero_home_name").value,
+          home_color: document.getElementById("hero_home_color").value,
+          home_flag: document.getElementById("hero_home_flag").value,
+          home_player: document.getElementById("hero_home_player").value,
+          away_name: document.getElementById("hero_away_name").value,
+          away_color: document.getElementById("hero_away_color").value,
+          away_flag: document.getElementById("hero_away_flag").value,
+          away_player: document.getElementById("hero_away_player").value,
+          vote_home:
+            parseInt(document.getElementById("hero_vote_home").value) || 0,
+          vote_away:
+            parseInt(document.getElementById("hero_vote_away").value) || 0,
+          vote_over:
+            parseInt(document.getElementById("hero_vote_over").value) || 0,
+          vote_under:
+            parseInt(document.getElementById("hero_vote_under").value) || 0,
+        };
+      }
+
+      async function updateHeroMatch() {
+        const id = document.getElementById("hero_match_id").value;
+        if (!id) return alert("ไม่พบ ID แมตช์");
+        try {
+          const res = await fetch(`${BASE_URL}/tbl_hero_board?id=eq.${id}`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify(getHeroFormData()),
+          });
+          if (res.ok) {
+            showHeroStatus(
+              "บันทึกการแก้ไขเรียบร้อยแล้ว! (เว็บจริงอัปเดตแล้ว)",
+              true
+            );
+            loadCurrentHeroMatch();
+          } else showHeroStatus("บันทึกไม่สำเร็จ", false);
+        } catch (e) {
+          showHeroStatus("Error: " + e.message, false);
+        }
+      }
+
+      async function createNewHeroMatch() {
+        if (
+          !confirm(
+            "ต้องการสร้างรายการแมตช์ใหม่ และรีเซ็ตคะแนนโหวตทั้งหมดเป็น 0 ใช่หรือไม่?"
+          )
+        )
+          return;
+        const payload = getHeroFormData();
+        payload.vote_home = 0;
+        payload.vote_away = 0;
+        payload.vote_over = 0;
+        payload.vote_under = 0;
+        try {
+          const res = await fetch(`${BASE_URL}/tbl_hero_board`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(payload),
+          });
+          if (res.ok) {
+            showHeroStatus("สร้างแมตช์ใหม่สำเร็จแล้ว!", true);
+            loadCurrentHeroMatch();
+          } else showHeroStatus("สร้างแมตช์ใหม่ไม่สำเร็จ", false);
+        } catch (e) {
+          showHeroStatus("Error: " + e.message, false);
+        }
+      }
+
+      function resetHeroVotes() {
+        if (
+          !confirm(
+            "ต้องการรีเซ็ตตัวเลขคะแนนโหวตบนฟอร์มเป็น 0 ใช่หรือไม่? (กดปุ่ม 'บันทึกการแก้ไข' เพื่อยืนยันอีกครั้ง)"
+          )
+        )
+          return;
+        document.getElementById("hero_vote_home").value = 0;
+        document.getElementById("hero_vote_away").value = 0;
+        document.getElementById("hero_vote_over").value = 0;
+        document.getElementById("hero_vote_under").value = 0;
+        showHeroStatus(
+          "รีเซ็ตตัวเลขเป็น 0 แล้ว กรุณากดปุ่ม 'บันทึกการแก้ไข' ด้านล่างเพื่ออัปเดตหน้าเว็บ",
+          true
+        );
+      }
+
+      function showHeroStatus(msg, isSuccess) {
+        const el = document.getElementById("status-msg-hero");
+        el.innerText = msg;
+        el.className = `p-3 rounded-xl text-center text-sm font-bold block ${
+          isSuccess
+            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+            : "bg-red-500/20 text-red-400 border border-red-500/30"
+        }`;
+        setTimeout(() => {
+          el.classList.add("hidden");
+        }, 5000);
+      }
+
+      // ==========================================
+      // 3. ตรรกะระบบตารางแข่ง Cyber-Gold Board
+      // ==========================================
+      let currentWcMatches = [];
+
+      async function loadWorldCupData() {
+        try {
+          const res = await fetch(
+            `${BASE_URL}/tbl_worldcup_board?order=id.desc&limit=1`,
+            { headers }
+          );
+          const data = await res.json();
+          if (!data || data.length === 0) {
+            showWcStatus("ไม่พบข้อมูล กำลังสร้างข้อมูลเริ่มต้น...", false);
+            createNewInitialWcRecord();
+            return;
+          }
+          const d = data[0];
+          document.getElementById("wc_record_id").value = d.id;
+          document.getElementById("wc_header_title").value =
+            d.header_title || "";
+          document.getElementById("wc_today_count").value = d.today_count || "";
+          document.getElementById("wc_upcoming_count").value =
+            d.upcoming_count || "";
+          document.getElementById("wc_countdown_target").value =
+            d.countdown_target || "";
+          document.getElementById("wc_iframe_code").value = d.iframe_code || "";
+          currentWcMatches = d.matches_list || [];
+          renderWcMatchesList();
+          showWcStatus("ดึงข้อมูลตารางแข่งล่าสุดเรียบร้อยแล้ว", true);
+        } catch (e) {
+          showWcStatus("Error: " + e.message, false);
+        }
+      }
+
+      function renderWcMatchesList() {
+        const container = document.getElementById("wc-matches-list-container");
+        document.getElementById(
+          "wc-match-count-badge"
+        ).innerText = `${currentWcMatches.length} คู่`;
+        if (currentWcMatches.length === 0) {
+          container.innerHTML = `<p class="text-center text-zinc-500 py-6 text-sm">ไม่มีรายการแข่งขัน</p>`;
+          return;
+        }
+        let html = "";
+        currentWcMatches.forEach((m, index) => {
+          html += `
+                    <div class="bg-[#181820] border border-zinc-800 p-3.5 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 w-full md:w-auto"><span class="bg-zinc-800 text-zinc-400 font-mono text-xs px-2.5 py-1 rounded-lg">#${
+                          index + 1
+                        }</span><div><div class="flex items-center gap-2"><span class="text-xs font-bold text-amber-400">[${
+            m.badge
+          }]</span><span class="text-xs text-zinc-300 font-mono">${m.date} - ${
+            m.time
+          }</span></div><div class="text-sm font-extrabold text-white mt-1 flex items-center gap-2"><span class="text-red-400">${
+            m.h_name
+          }</span> <span class="text-xs text-zinc-500 italic font-mono">VS</span> <span class="text-blue-400">${
+            m.a_name
+          }</span><span class="text-[11px] bg-yellow-400/10 text-yellow-300 border border-yellow-400/30 px-2 py-0.5 rounded font-mono ml-2">เซียนให้ ${
+            m.rate
+          }%</span></div></div></div>
+                        <div class="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end border-t md:border-t-0 pt-2 md:pt-0 border-zinc-800"><a href="${
+                          m.url
+                        }" target="_blank" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-external-link-alt"></i> ดูลิงก์</a><button onclick="removeWcMatchItem(${index})" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition"><i class="fas fa-trash"></i> ลบ</button></div>
+                    </div>`;
+        });
+        container.innerHTML = html;
+      }
+
+      function addWorldCupMatch(e) {
+        e.preventDefault();
+        const newMatch = {
+          date: document.getElementById("wcm_date").value,
+          badge: document.getElementById("wcm_badge").value,
+          time: document.getElementById("wcm_time").value,
+          rate: parseInt(document.getElementById("wcm_rate").value) || 50,
+          h_name: document.getElementById("wcm_hname").value,
+          h_flag: document.getElementById("wcm_hflag").value,
+          a_name: document.getElementById("wcm_aname").value,
+          a_flag: document.getElementById("wcm_aflag").value,
+          url: document.getElementById("wcm_url").value,
+        };
+        currentWcMatches.push(newMatch);
+        renderWcMatchesList();
+        document.getElementById("wcMatchForm").reset();
+        document.getElementById("wcm_rate").value = "60";
+        showWcStatus(
+          "เพิ่มคู่บอลเข้าตารางเรียบร้อยแล้ว! (กรุณากดปุ่มบันทึกใหญ่ด้านล่างเพื่ออัปเดตเว็บจริง)",
+          true
+        );
+      }
+
+      function removeWcMatchItem(index) {
+        if (!confirm("ต้องการลบโปรแกรมคู่นี้ออกใช่หรือไม่?")) return;
+        currentWcMatches.splice(index, 1);
+        renderWcMatchesList();
+        showWcStatus(
+          "ลบรายการออกแล้ว! (กดปุ่มบันทึกใหญ่ด้านล่างเพื่ออัปเดตเว็บจริง)",
+          true
+        );
+      }
+
+      async function saveAllWorldCupToSupabase() {
+        const id = document.getElementById("wc_record_id").value;
+        if (!id) return alert("ไม่พบ ID ข้อมูล");
+        const payload = {
+          header_title: document.getElementById("wc_header_title").value,
+          today_count: document.getElementById("wc_today_count").value,
+          upcoming_count: document.getElementById("wc_upcoming_count").value,
+          countdown_target: document.getElementById("wc_countdown_target")
+            .value,
+          iframe_code: document.getElementById("wc_iframe_code").value,
+          matches_list: currentWcMatches,
+        };
+        try {
+          const res = await fetch(
+            `${BASE_URL}/tbl_worldcup_board?id=eq.${id}`,
+            { method: "PATCH", headers, body: JSON.stringify(payload) }
+          );
+          if (res.ok) {
+            showWcStatus(
+              "🎉 บันทึกตารางแข่งทั้งหมดขึ้นเว็บจริงเรียบร้อยแล้ว!",
+              true
+            );
+            loadWorldCupData();
+          } else showWcStatus("บันทึกไม่สำเร็จ", false);
+        } catch (e) {
+          showWcStatus("Error: " + e.message, false);
+        }
+      }
+
+      async function createNewInitialWcRecord() {
+        const payload = {
+          header_title: "ตารางการแข่งขัน",
+          today_count: "วันนี้ 1 คู่",
+          upcoming_count: "PREMIER LEAGUE",
+          countdown_target: "2026-08-01 20:00:00",
+          iframe_code: "https://google.com",
+          matches_list: [],
+        };
+        await fetch(`${BASE_URL}/tbl_worldcup_board`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload),
+        });
+        loadWorldCupData();
+      }
+
+      function showWcStatus(msg, isSuccess) {
+        const el = document.getElementById("status-msg-wc");
+        el.innerText = msg;
+        el.className = `p-3 rounded-xl text-center text-sm font-bold block ${
+          isSuccess
+            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+            : "bg-red-500/20 text-red-400 border border-red-500/30"
+        }`;
+        setTimeout(() => {
+          el.classList.add("hidden");
+        }, 6000);
+      }
+
+      // โหลดข้อมูลป้ายโฆษณาเป็นแท็บเริ่มต้นเมื่อเปิดเว็บ
+      window.onload = () => {
+        fetchBanners();
+      };
+    </script>
+  </body>
+</html>

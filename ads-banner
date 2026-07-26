@@ -1,0 +1,145 @@
+<!-- ==========================================
+     WIDGET ป้ายโฆษณา TOPFORM369 (กรอบทอง VIP 3D)
+=========================================== -->
+<div id="banner-mount" style="width: 100%; max-width: 1200px; margin: 15px auto; display: flex; flex-direction: column; gap: 16px; padding: 0 10px; box-sizing: border-box;"></div>
+
+<style>
+    /* 1. กรอบชั้นนอก: ไล่เฉดสีทอง-ดำ มีมิตินูนลึก */
+    .ad-banner-item {
+        display: block;
+        width: 100%;
+        border-radius: 16px;
+        padding: 3px; /* ความหนาของเส้นขอบทอง */
+        background: linear-gradient(135deg, #D4AF37 0%, #18181b 50%, #F3E5AB 100%);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.15);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        text-decoration: none;
+        position: relative;
+    }
+
+    /* เอฟเฟกต์ตอนชี้: กรอบสว่างขึ้น และยกตัวลอย */
+    .ad-banner-item:hover {
+        transform: translateY(-5px) scale(1.01);
+        background: linear-gradient(135deg, #F3E5AB 0%, #D4AF37 50%, #ffffff 100%);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.4);
+    }
+
+    /* 2. กรอบชั้นใน: คลุมรูปภาพและสร้างมุมตัด */
+    .ad-banner-inner {
+        border-radius: 13px;
+        overflow: hidden;
+        background: #09090b;
+        position: relative;
+        line-height: 0;
+    }
+
+    /* 3. ลวดลายมุมกรอบฉากทอง (บนซ้าย & ล่างขวา) */
+    .ad-banner-inner::before,
+    .ad-banner-inner::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+        z-index: 3;
+        transition: all 0.4s ease;
+    }
+
+    /* มุมบนซ้าย */
+    .ad-banner-inner::before {
+        top: 8px;
+        left: 8px;
+        border-top: 3px solid #F3E5AB;
+        border-left: 3px solid #F3E5AB;
+        border-top-left-radius: 6px;
+        filter: drop-shadow(0 0 5px rgba(243, 229, 171, 0.8));
+    }
+
+    /* มุมล่างขวา */
+    .ad-banner-inner::after {
+        bottom: 8px;
+        right: 8px;
+        border-bottom: 3px solid #D4AF37;
+        border-right: 3px solid #D4AF37;
+        border-bottom-right-radius: 6px;
+        filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.8));
+    }
+
+    /* เมื่อชี้ให้มุมฉากขยายใหญ่ขึ้นเข้าหากึ่งกลาง */
+    .ad-banner-item:hover .ad-banner-inner::before,
+    .ad-banner-item:hover .ad-banner-inner::after {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* 4. ลำแสงสีขาววิ่งสะท้อนผ่านหน้าป้าย (VIP Shine Effect) */
+    .ad-banner-inner .shine-effect {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+        transform: skewX(-25deg);
+        z-index: 2;
+        transition: all 0.75s ease;
+        pointer-events: none;
+    }
+    .ad-banner-item:hover .shine-effect {
+        left: 150%;
+    }
+
+    /* 5. ตั้งค่ารูปภาพให้เต็มใบ 100% ไม่โดนตัดขอบ */
+    .ad-banner-inner img {
+        width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        display: block;
+        object-fit: contain;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ปรับขนาดมุมบนมือถือไม่ให้บังเนื้อหาป้ายมากเกินไป */
+    @media (max-width: 768px) {
+        .ad-banner-inner::before, .ad-banner-inner::after {
+            width: 14px; height: 14px; border-width: 2px;
+        }
+        .ad-banner-item:hover .ad-banner-inner::before,
+        .ad-banner-item:hover .ad-banner-inner::after {
+            width: 20px; height: 20px;
+        }
+    }
+</style>
+
+<script>
+(async function() {
+    const DB_URL = "https://pcrurldhpubyznrdackb.supabase.co/rest/v1/tbl_banners?is_active=eq.true&order=sort_order.asc";
+    const API_KEY = "sb_publishable_iM2V0yw1KKfpGVwa7LwDXg_KbL3lGG0";
+    const mount = document.getElementById("banner-mount");
+
+    try {
+        const res = await fetch(DB_URL, {
+            headers: { "apikey": API_KEY, "Authorization": `Bearer ${API_KEY}` }
+        });
+        const banners = await res.json();
+
+        if (!banners || banners.length === 0) return;
+
+        let html = "";
+        banners.forEach(ad => {
+            html += `
+                <a href="${ad.target_url}" target="_blank" rel="nofollow noopener" class="ad-banner-item" title="${ad.title}">
+                    <div class="ad-banner-inner">
+                        <div class="shine-effect"></div>
+                        <img src="${ad.image_url}" alt="${ad.title}" loading="lazy" onerror="this.closest('.ad-banner-item').style.display='none'">
+                    </div>
+                </a>
+            `;
+        });
+        mount.innerHTML = html;
+    } catch (e) {
+        console.error("Banner Error:", e);
+    }
+})();
+</script>

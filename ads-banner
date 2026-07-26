@@ -114,7 +114,7 @@
 
 <script>
 (async function() {
-    const DB_URL = "https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1/tbl_ad_banners?order=sort_order.asc";
+    const DB_URL = "https://mpakuymtnfvbaukhhdch.supabase.co/rest/v1/tbl_banners";
     const API_KEY = "sb_publishable_mEO4n-ep4h5aP6FYZKC3yA_7KikwCCa";
     const mount = document.getElementById("banner-mount");
 
